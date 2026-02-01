@@ -218,7 +218,8 @@
             <div class="grid md:grid-cols-2 gap-24 items-center">
                 <div class="reveal-left">
                     <h2 class="text-5xl font-extrabold mb-8 tracking-tighter leading-tight">Clareza Estratégica
-                        <br /><span class="text-slate-400">antes da Escala</span></h2>
+                        <br /><span class="text-slate-400">antes da Escala</span>
+                    </h2>
                     <p class="text-lg text-slate-600 mb-10 leading-relaxed font-medium">
                         Tecnologia de ponta exige fundamentos sólidos. Criamos a espinha dorsal técnica necessária para
                         o seu crescimento.
@@ -272,32 +273,34 @@
                         <p class="text-slate-500 mb-10 leading-relaxed font-medium">Ouça a clareza dos nossos agentes
                             autônomos e sinta a diferença da nossa engenharia de voz.</p>
                         <div class="grid gap-4">
-                            <div onclick="playAgent('Rodrigo')"
+                            <div onclick="playAgent('Pedro')"
                                 class="agent-card flex items-center justify-between p-7 bg-white border border-slate-100 rounded-3xl cursor-pointer hover:bg-black hover:text-white transition group">
                                 <div class="flex items-center gap-6">
                                     <span class="text-3xl">👨💼</span>
                                     <div>
-                                        <h4 class="font-bold text-xl">Agente Rodrigo</h4>
+                                        <h4 class="font-bold text-xl">Agente Pedro</h4>
                                         <p class="text-xs opacity-50 uppercase tracking-widest mt-1">Operações & Tech
                                         </p>
                                     </div>
                                 </div>
                                 <div
                                     class="w-12 h-12 rounded-full border-2 border-slate-100 flex items-center justify-center group-hover:border-white/20">
-                                    <i data-lucide="play" class="w-5 h-5"></i></div>
+                                    <i data-lucide="play" class="w-5 h-5"></i>
+                                </div>
                             </div>
-                            <div onclick="playAgent('Alicia')"
+                            <div onclick="playAgent('Luiza')"
                                 class="agent-card flex items-center justify-between p-7 bg-white border border-slate-100 rounded-3xl cursor-pointer hover:bg-black hover:text-white transition group">
                                 <div class="flex items-center gap-6">
                                     <span class="text-3xl">👩💼</span>
                                     <div>
-                                        <h4 class="font-bold text-xl">Agente Alicia</h4>
+                                        <h4 class="font-bold text-xl">Agente Luiza</h4>
                                         <p class="text-xs opacity-50 uppercase tracking-widest mt-1">SDR & Comercial</p>
                                     </div>
                                 </div>
                                 <div
                                     class="w-12 h-12 rounded-full border-2 border-slate-100 flex items-center justify-center group-hover:border-white/20">
-                                    <i data-lucide="play" class="w-5 h-5"></i></div>
+                                    <i data-lucide="play" class="w-5 h-5"></i>
+                                </div>
                             </div>
                         </div>
                         <div id="audioStatus"
@@ -393,7 +396,7 @@
                         <div class="mt-16 text-center">
                             <button type="submit"
                                 class="inline-block w-full max-w-lg bg-white text-black py-6 rounded-2xl font-extrabold text-xl btn-premium">Enviar
-                                Diagnóstico</button>
+                                para o Telegram</button>
                         </div>
                     </div>
                 </div>
@@ -469,7 +472,7 @@
             <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-10"><i
                     data-lucide="check" class="w-12 h-12 text-black"></i></div>
             <h3 class="text-4xl font-extrabold mb-6 tracking-tighter text-slate-900">Diagnóstico Enviado</h3>
-            <p class="text-slate-500 mb-12 text-lg">Recebemos seu agendamento. O dia selecionado será
+            <p class="text-slate-500 mb-12 text-lg">Recebemos seu agendamento via Telegram. O dia selecionado está
                 reservado para o seu perfil técnico.</p>
             <button onclick="closeModal()"
                 class="w-full bg-black text-white py-6 rounded-2xl font-bold text-lg btn-premium">Entendido</button>
@@ -481,10 +484,38 @@
             lucide.createIcons();
 
             // --- PROTEÇÃO / SECURITY ---
+            // 1. Bloqueia botão direito
             document.addEventListener('contextmenu', e => e.preventDefault());
+
+            // 2. Bloqueia atalhos de desenvolvedor
             document.onkeydown = (e) => {
-                if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false;
+                const forbidden = [123, 73, 74, 67, 85, 83]; // F12, I, J, C, U, S
+                if (forbidden.includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode === 123)) {
+                    return false;
+                }
             };
+
+            // 3. Debugger Trap (Anti-DevTools)
+            // Isso cria um loop que pausa o navegador se o DevTools for aberto
+            (function detectDevTools() {
+                const start = performance.now();
+                debugger;
+                const end = performance.now();
+                if (end - start > 100) {
+                    // Se o debugger causar um atraso, o DevTools está provavelmente aberto
+                    document.body.innerHTML = `
+                        <div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#000; color:#fff; font-family:sans-serif; text-align:center; padding:20px;">
+                            <h1 style="font-size:3rem; margin-bottom:1rem;">Acesso Protegido</h1>
+                            <p style="font-size:1.2rem; opacity:0.7;">O MIRIX utiliza protocolos de segurança avançados para proteger sua propriedade intelectual.</p>
+                            <button onclick="location.reload()" style="margin-top:2rem; padding:1rem 2rem; background:#fff; color:#000; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Recarregar Página</button>
+                        </div>
+                    `;
+                }
+                setTimeout(detectDevTools, 500);
+            })();
+
+            // 4. Bloqueia arrastar elementos (evita salvar imagens/códigos)
+            document.addEventListener('dragstart', e => e.preventDefault());
 
             // --- LENIS ---
             const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
@@ -630,8 +661,8 @@
                     `<b>Empresa:</b> ${fd.get('empresa')}\n` +
                     `<b>Agendado para:</b> ${dateVal} às ${timeVal}`;
 
-                const token = '8462570287:AAFfWRD6SvxiDYHBiYugiE9vSprWhoAP21k';
-                const chatId = '-5286965181';
+                const token = '8245451978:AAE0pBckFFPba7o3QAaa-BTYG-klIxUe3do';
+                const chatId = '-4985215344';
 
                 try {
                     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
