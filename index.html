@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt-BR" oncontextmenu="return false;">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIRIX | Engenharia de IA e Interfaces de Alta Performance</title>
+
+    <!-- Scripts & Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.27/bundled/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-black: #000000;
+            --brand-white: #ffffff;
+            --brand-gray: #f8fafc;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background-color: var(--brand-white);
+            color: #0f172a;
+            user-select: none;
+            /* Disable text selection for premium feel/security */
+        }
+
+        /* Lenis Smooth Scroll */
+        html.lenis {
+            height: auto;
+        }
+
+        .lenis.lenis-smooth {
+            scroll-behavior: auto;
+        }
+
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: saturate(180%) blur(20px);
+        }
+
+        .btn-premium {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Animation Classes */
+        .hero-reveal,
+        .reveal,
+        .reveal-left,
+        .reveal-right {
+            visibility: hidden;
+        }
+
+        /* Background Blobs */
+        .blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.03) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -50px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        /* FAQ Accordion */
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+
+        .faq-item.active .faq-content {
+            max-height: 200px;
+        }
+
+        /* Mobile Menu */
+        .nav-menu {
+            transition: transform 0.4s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                background: white;
+                height: calc(100vh - 80px);
+                transform: translateX(100%);
+                flex-direction: column;
+                padding: 40px;
+                z-index: 40;
+            }
+
+            .nav-menu.active {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-white text-slate-950 overflow-x-hidden">
+
+    <div class="blob" style="top: -10%; left: -10%; animation: float 20s infinite;"></div>
+    <div class="blob" style="bottom: -10%; right: -10%; animation: float 25s infinite reverse;"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-nav border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center">
+                <svg width="120" height="32" viewBox="0 0 280 70" fill="none" class="h-8 w-auto">
+                    <path d="M15 25C15 25 35 5 55 25C75 45 95 65 95 65M15 45C15 45 35 65 55 45C75 25 95 5 95 5"
+                        stroke="black" stroke-width="12" stroke-linecap="round" />
+                    <text x="110" y="52" font-family="Plus Jakarta Sans" font-weight="800" font-size="48"
+                        fill="black">MIRIX</text>
+                </svg>
+            </div>
+
+            <div class="hidden md:flex gap-8 text-sm font-semibold text-slate-500 nav-menu">
+                <a href="#metodologia" class="nav-link hover:text-black transition">Metodologia</a>
+                <a href="#agentes" class="nav-link hover:text-black transition">Agentes</a>
+                <a href="#faq" class="nav-link hover:text-black transition">FAQ</a>
+                <a href="#agendar"
+                    class="btn-premium bg-black text-white px-7 py-3 rounded-full text-sm font-bold md:hidden">Conversa
+                    Estratégica</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="#agendar"
+                    class="hidden md:block btn-premium bg-black text-white px-7 py-3 rounded-full text-sm font-bold">Conversa
+                    Estratégica</a>
+                <button class="md:hidden mobile-menu-toggle flex flex-col gap-1.5 p-2">
+                    <span class="w-6 h-0.5 bg-black transition-all"></span>
+                    <span class="w-6 h-0.5 bg-black transition-all"></span>
+                    <span class="w-6 h-0.5 bg-black transition-all"></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-52 pb-32 px-6 relative">
+        <div class="max-w-5xl mx-auto text-center">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-10 hero-reveal">
+                <span class="relative flex h-2 w-2">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
+                </span>
+                Engenharia de IA e Interfaces
+            </div>
+            <h1
+                class="text-6xl md:text-[92px] font-extrabold leading-[0.95] tracking-tighter mb-10 hero-reveal overflow-hidden">
+                <span class="inline-block">Engenharia Real.</span><br />
+                <span class="text-slate-400 inline-block">Escala Inevitável.</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-500 max-w-2xl mx-auto mb-14 font-medium hero-reveal">
+                Automatizamos processos críticos com agentes de IA e interfaces de alta performance para empresas que
+                buscam eficiência absoluta.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-5 justify-center hero-reveal">
+                <a href="#agendar"
+                    class="btn-premium bg-black text-white px-12 py-5 rounded-2xl font-bold text-lg shadow-xl shadow-black/10">Começar
+                    Agora</a>
+                <a href="#agentes"
+                    class="btn-premium bg-white border border-slate-200 px-12 py-5 rounded-2xl font-bold text-lg hover:bg-slate-50">Ver
+                    Demonstrações</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Metodologia -->
+    <section id="metodologia" class="py-32 bg-slate-50/50 border-y border-slate-100">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-24 items-center">
+                <div class="reveal-left">
+                    <h2 class="text-5xl font-extrabold mb-8 tracking-tighter leading-tight">Clareza Estratégica
+                        <br /><span class="text-slate-400">antes da Escala</span></h2>
+                    <p class="text-lg text-slate-600 mb-10 leading-relaxed font-medium">
+                        Não somos apenas uma agência de IA. Somos parceiros de engenharia. Criamos bases sólidas para
+                        que sua escala seja sustentável.
+                    </p>
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-5 p-4 rounded-2xl bg-white border border-slate-100">
+                            <div
+                                class="mt-1 w-8 h-8 flex items-center justify-center bg-black rounded-xl text-white font-bold text-xs">
+                                01</div>
+                            <div>
+                                <h4 class="font-bold text-lg">Código de Elite</h4>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-5 p-4 rounded-2xl bg-white border border-slate-100">
+                            <div
+                                class="mt-1 w-8 h-8 flex items-center justify-center bg-black rounded-xl text-white font-bold text-xs">
+                                02</div>
+                            <div>
+                                <h4 class="font-bold text-lg">Agentes Neurais</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6 reveal-right">
+                    <div class="bg-white p-10 rounded-[40px] shadow-sm border border-slate-100 transform translate-y-8">
+                        <div class="text-4xl font-extrabold mb-3 counter" data-target="94">0</div>
+                        <p class="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Automação</p>
+                    </div>
+                    <div class="bg-black text-white p-10 rounded-[40px] shadow-2xl">
+                        <div class="text-4xl font-extrabold mb-3 counter" data-target="350">0</div>
+                        <p class="text-[10px] text-white/50 font-extrabold uppercase tracking-widest">Eficiência</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-32 px-6 bg-white">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl font-extrabold mb-12 tracking-tighter text-center reveal">Perguntas Frequentes</h2>
+            <div class="space-y-4">
+                <div class="faq-item border border-slate-100 rounded-3xl p-6 hover:bg-slate-50 transition reveal">
+                    <div class="faq-question flex justify-between items-center cursor-pointer">
+                        <h4 class="font-bold">Como funcionam os agentes de IA?</h4>
+                        <span class="toggle-icon text-2xl font-light transition-transform">+</span>
+                    </div>
+                    <div class="faq-content text-slate-500 text-sm mt-4">
+                        Nossos agentes são treinados com seus dados específicos para executar tarefas complexas
+                        autonomamente, desde suporte até vendas.
+                    </div>
+                </div>
+                <div class="faq-item border border-slate-100 rounded-3xl p-6 hover:bg-slate-50 transition reveal">
+                    <div class="faq-question flex justify-between items-center cursor-pointer">
+                        <h4 class="font-bold">Quanto tempo leva para implementar?</h4>
+                        <span class="toggle-icon text-2xl font-light transition-transform">+</span>
+                    </div>
+                    <div class="faq-content text-slate-500 text-sm mt-4">
+                        Projetos típicos levam entre 2 a 6 semanas, dependendo da complexidade das integrações.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Agentes de Voz -->
+    <section id="agentes" class="py-40 px-6 overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col lg:flex-row gap-24 items-center">
+                <div class="lg:w-1/2 reveal-left">
+                    <h2 class="text-5xl font-extrabold mb-8 tracking-tighter leading-tight">Inteligência que <span
+                            class="text-slate-400">Responde</span></h2>
+                    <div class="grid gap-4">
+                        <div onclick="playAgent('Rodrigo')"
+                            class="agent-card flex items-center justify-between p-7 bg-white border border-slate-100 rounded-3xl cursor-pointer hover:bg-black hover:text-white transition group">
+                            <div class="flex items-center gap-6">
+                                <span class="text-3xl">👨💼</span>
+                                <div>
+                                    <h4 class="font-bold text-xl">Agente Rodrigo</h4>
+                                    <p class="text-xs opacity-50 uppercase tracking-widest">Operações</p>
+                                </div>
+                            </div>
+                            <div
+                                class="w-12 h-12 rounded-full border-2 border-slate-100 flex items-center justify-center group-hover:border-white/20">
+                                <i data-lucide="play" class="w-5 h-5"></i></div>
+                        </div>
+                        <div onclick="playAgent('Alicia')"
+                            class="agent-card flex items-center justify-between p-7 bg-white border border-slate-100 rounded-3xl cursor-pointer hover:bg-black hover:text-white transition group">
+                            <div class="flex items-center gap-6">
+                                <span class="text-3xl">👩💼</span>
+                                <div>
+                                    <h4 class="font-bold text-xl">Agente Alicia</h4>
+                                    <p class="text-xs opacity-50 uppercase tracking-widest">SDR</p>
+                                </div>
+                            </div>
+                            <div
+                                class="w-12 h-12 rounded-full border-2 border-slate-100 flex items-center justify-center group-hover:border-white/20">
+                                <i data-lucide="play" class="w-5 h-5"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="agendar"
+                    class="lg:w-1/2 bg-slate-900 text-white rounded-[60px] p-10 md:p-16 relative reveal-right">
+                    <h3 class="text-3xl font-extrabold mb-10 tracking-tighter">Iniciar Projeto</h3>
+                    <form id="mirixForm" class="contact-form grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-3">
+                            <label
+                                class="text-[10px] font-extrabold text-white/30 uppercase tracking-widest">Nome</label>
+                            <input type="text" name="nome"
+                                class="w-full px-0 py-4 bg-transparent border-b border-white/10 outline-none focus:border-white"
+                                placeholder="John Doe" required>
+                        </div>
+                        <div class="space-y-3">
+                            <label
+                                class="text-[10px] font-extrabold text-white/30 uppercase tracking-widest">WhatsApp</label>
+                            <input type="tel" id="whatsapp" name="whatsapp"
+                                class="w-full px-0 py-4 bg-transparent border-b border-white/10 outline-none focus:border-white"
+                                placeholder="00 00000-0000" required>
+                        </div>
+                        <div class="space-y-3">
+                            <label
+                                class="text-[10px] font-extrabold text-white/30 uppercase tracking-widest">E-mail</label>
+                            <input type="email" name="email"
+                                class="w-full px-0 py-4 bg-transparent border-b border-white/10 outline-none focus:border-white"
+                                placeholder="ceo@empresa.com" required>
+                        </div>
+                        <div class="space-y-3">
+                            <label
+                                class="text-[10px] font-extrabold text-white/30 uppercase tracking-widest">Empresa</label>
+                            <input type="text" name="empresa"
+                                class="w-full px-0 py-4 bg-transparent border-b border-white/10 outline-none focus:border-white"
+                                required>
+                        </div>
+                        <div class="md:col-span-2 space-y-4">
+                            <label
+                                class="text-[10px] font-extrabold text-white/30 uppercase tracking-widest text-center block w-full">Selecione
+                                o Dia da Reunião</label>
+                            <div class="custom-calendar bg-white/5 rounded-3xl p-6 border border-white/10">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h4 id="calendarMonth" class="font-bold text-sm tracking-widest uppercase"></h4>
+                                    <div class="flex gap-2">
+                                        <button type="button" onclick="changeMonth(-1)"
+                                            class="p-2 bg-white/5 rounded-lg hover:bg-white/10"><i
+                                                data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                                        <button type="button" onclick="changeMonth(1)"
+                                            class="p-2 bg-white/5 rounded-lg hover:bg-white/10"><i
+                                                data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                                    </div>
+                                </div>
+                                <div
+                                    class="grid grid-cols-7 gap-1 text-center text-[10px] text-white/20 mb-4 uppercase font-bold">
+                                    <div>Dom</div>
+                                    <div>Seg</div>
+                                    <div>Ter</div>
+                                    <div>Qua</div>
+                                    <div>Qui</div>
+                                    <div>Sex</div>
+                                    <div>Sáb</div>
+                                </div>
+                                <div id="calendarDays" class="grid grid-cols-7 gap-2"></div>
+                                <input type="hidden" name="prazo" id="meetingDate" required>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 space-y-3">
+                            <label
+                                class="text-[10px] font-extrabold text-white/30 uppercase tracking-widest">Horário</label>
+                            <div id="timeGrid" class="grid grid-cols-4 gap-3"></div>
+                            <input type="hidden" name="meta" id="meetingTime" required>
+                        </div>
+                        <div class="md:col-span-2 pt-10">
+                            <button type="submit"
+                                class="w-full bg-white text-black py-6 rounded-2xl font-extrabold text-lg btn-premium">Enviar
+                                Diagnóstico</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-24 px-6 bg-white border-t border-slate-100">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
+            <svg width="100" height="28" viewBox="0 0 280 70" fill="none" class="h-8 w-auto">
+                <path d="M15 25C15 25 35 5 55 25C75 45 95 65 95 65M15 45C15 45 35 65 55 45C75 25 95 5 95 5"
+                    stroke="black" stroke-width="12" stroke-linecap="round" />
+                <text x="110" y="52" font-family="Plus Jakarta Sans" font-weight="800" font-size="48"
+                    fill="black">MIRIX</text>
+            </svg>
+            <div class="flex gap-10">
+                <a href="https://www.instagram.com/mirix.ai/" target="_blank"
+                    class="text-xs font-extrabold uppercase tracking-widest text-slate-400 hover:text-black transition">Instagram</a>
+            </div>
+            <p class="text-slate-400 text-sm">MIRIX ENGINEERING © 2026. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div id="successModal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-xl z-[100] hidden items-center justify-center p-6">
+        <div class="bg-white p-16 rounded-[60px] max-w-xl w-full text-center shadow-2xl scale-90 transition-transform duration-500"
+            id="modalContent">
+            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-10"><i
+                    data-lucide="check" class="w-12 h-12 text-black"></i></div>
+            <h3 class="text-4xl font-extrabold mb-6 tracking-tighter">Enviado com Sucesso</h3>
+            <p class="text-slate-500 mb-12 text-lg">Um engenheiro entrará em contato via WhatsApp no horário agendado.
+            </p>
+            <button onclick="closeModal()"
+                class="w-full bg-black text-white py-6 rounded-2xl font-bold text-lg btn-premium">Entendido</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // --- PROTEÇÃO ---
+            document.onkeydown = (e) => {
+                if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false;
+            };
+
+            // --- LENIS ---
+            const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+            requestAnimationFrame(raf);
+            lenis.on('scroll', ScrollTrigger.update);
+            gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+            gsap.ticker.lagSmoothing(0);
+
+            // --- ANIMATIONS ---
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.set(".hero-reveal, .reveal, .reveal-left, .reveal-right", { visibility: "visible" });
+
+            const heroTl = gsap.timeline();
+            heroTl.from(".hero-reveal span.inline-block", { y: 100, opacity: 0, duration: 1.2, ease: "expo.out", stagger: 0.2 })
+                .from(".hero-reveal:not(h1)", { y: 40, opacity: 0, duration: 1, ease: "power3.out", stagger: 0.1 }, "-=0.8");
+
+            gsap.utils.toArray(".reveal, .reveal-left, .reveal-right").forEach(t => {
+                gsap.from(t, { scrollTrigger: { trigger: t, start: "top 90%" }, y: 50, x: t.classList.contains('reveal-left') ? -50 : (t.classList.contains('reveal-right') ? 50 : 0), opacity: 0, duration: 1.2, ease: "power4.out" });
+            });
+
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach(c => {
+                const target = +c.dataset.target;
+                gsap.to(c, {
+                    innerText: target, duration: 2, snap: { innerText: 1 }, scrollTrigger: { trigger: c, start: "top 90%" },
+                    onUpdate: () => { c.innerText = target == 94 ? c.innerText + "%" : (target == 350 ? (parseInt(c.innerText) / 100).toFixed(1) + "x" : c.innerText); }
+                });
+            });
+
+            // --- MOBILE MENU ---
+            const mobileMenuBtn = document.querySelector('.mobile-menu-toggle');
+            const navMenu = document.querySelector('.nav-menu');
+            mobileMenuBtn.onclick = () => {
+                navMenu.classList.toggle('active');
+                mobileMenuBtn.querySelectorAll('span').forEach((s, i) => {
+                    if (navMenu.classList.contains('active')) {
+                        if (i == 0) s.style.transform = 'rotate(45deg) translate(5px, 5px)';
+                        if (i == 1) s.style.opacity = '0';
+                        if (i == 2) s.style.transform = 'rotate(-45deg) translate(5px, -5px)';
+                    } else {
+                        s.style.transform = 'none'; s.style.opacity = '1';
+                    }
+                });
+            };
+
+            // --- FAQ ---
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.onclick = () => {
+                    document.querySelectorAll('.faq-item').forEach(other => { if (other !== item) other.classList.remove('active'); });
+                    item.classList.toggle('active');
+                    document.querySelectorAll('.toggle-icon').forEach(icon => icon.style.transform = 'rotate(0deg)');
+                    if (item.classList.contains('active')) item.querySelector('.toggle-icon').style.transform = 'rotate(45deg)';
+                };
+            });
+
+            // --- PHONE MASK ---
+            const phoneInput = document.getElementById('whatsapp');
+            phoneInput.oninput = (e) => {
+                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : x[1] + ' ' + x[2] + (x[3] ? '-' + x[3] : '');
+            };
+
+            // --- CALENDAR LOGIC ---
+            let currentDisplayDate = new Date();
+            let selectedDate = null;
+            const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const slots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
+
+            function renderCalendar() {
+                const year = currentDisplayDate.getFullYear();
+                const month = currentDisplayDate.getMonth();
+                document.getElementById('calendarMonth').innerText = `${months[month]} ${year}`;
+                const firstDay = new Date(year, month, 1).getDay();
+                const lastDate = new Date(year, month + 1, 0).getDate();
+                const calendarDays = document.getElementById('calendarDays');
+                calendarDays.innerHTML = "";
+                const bookedDays = JSON.parse(localStorage.getItem('mirix_booked_days') || "[]");
+
+                for (let i = 0; i < firstDay; i++) calendarDays.appendChild(document.createElement("div"));
+                for (let day = 1; day <= lastDate; day++) {
+                    const d = new Date(year, month, day);
+                    const dateStr = d.toISOString().split('T')[0];
+                    const btn = document.createElement("button");
+                    btn.type = "button"; btn.innerText = day;
+                    btn.className = "h-10 rounded-xl text-xs font-bold transition-all flex items-center justify-center ";
+
+                    if (d < new Date().setHours(0, 0, 0, 0) || bookedDays.includes(dateStr)) {
+                        btn.className += "opacity-10 cursor-not-allowed"; btn.disabled = true;
+                    } else {
+                        btn.className += "hover:bg-white/10 " + (selectedDate && dateStr === selectedDate.toISOString().split('T')[0] ? "bg-white text-black" : "bg-white/5 text-white/60");
+                        btn.onclick = () => {
+                            selectedDate = d;
+                            document.getElementById('meetingDate').value = dateStr;
+                            renderCalendar(); renderTimeGrid();
+                        };
+                    }
+                    calendarDays.appendChild(btn);
+                }
+            }
+
+            window.changeMonth = (o) => { currentDisplayDate.setMonth(currentDisplayDate.getMonth() + o); renderCalendar(); };
+
+            function renderTimeGrid() {
+                const grid = document.getElementById('timeGrid');
+                grid.innerHTML = "";
+                slots.forEach(s => {
+                    const btn = document.createElement("button");
+                    btn.type = "button"; btn.innerText = s;
+                    const isSelected = document.getElementById('meetingTime').value === s;
+                    btn.className = `py-3 rounded-xl text-xs font-bold transition-all border ${isSelected ? "bg-white text-black border-white shadow-lg" : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10"}`;
+                    btn.onclick = () => { document.getElementById('meetingTime').value = s; renderTimeGrid(); };
+                    grid.appendChild(btn);
+                });
+            }
+
+            renderCalendar(); renderTimeGrid();
+
+            // --- TELEGRAM INTEGRATION ---
+            const form = document.querySelector('.contact-form');
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                const btn = form.querySelector('button[type="submit"]');
+                const originalText = btn.innerText;
+                btn.innerText = "Enviando...";
+
+                const formData = new FormData(form);
+                const msg = `<b>Novo Orçamento MIRIX</b>\n\n` +
+                    `<b>Nome:</b> ${formData.get('nome')}\n` +
+                    `<b>WhatsApp:</b> ${formData.get('whatsapp')}\n` +
+                    `<b>Email:</b> ${formData.get('email')}\n` +
+                    `<b>Empresa:</b> ${formData.get('empresa')}\n` +
+                    `<b>Data:</b> ${formData.get('prazo')}\n` +
+                    `<b>Horário:</b> ${formData.get('meta')}`;
+
+                const token = '8245451978:AAE0pBckFFPba7o3QAaa-BTYG-klIxUe3do';
+                const chatId = '-4985215344';
+
+                try {
+                    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: 'HTML' })
+                    });
+
+                    if (res.ok) {
+                        // Persist booking
+                        const bookedDays = JSON.parse(localStorage.getItem('mirix_booked_days') || "[]");
+                        bookedDays.push(document.getElementById('meetingDate').value);
+                        localStorage.setItem('mirix_booked_days', JSON.stringify(bookedDays));
+
+                        document.getElementById('successModal').classList.remove('hidden');
+                        document.getElementById('successModal').classList.add('flex');
+                        form.reset(); selectedDate = null; renderCalendar(); renderTimeGrid();
+                    }
+                } catch (err) { alert("Erro ao enviar. Tente novamente."); }
+                btn.innerText = originalText;
+            };
+        });
+
+        // --- AUDIO ---
+        function playAgent(name) {
+            const audio = new Audio(`./audios/${name.toLowerCase()}.mp3`);
+            audio.play().catch(() => alert(`Arquivo audios/${name.toLowerCase()}.mp3 não encontrado.`));
+        }
+
+        function closeModal() {
+            document.getElementById('modalContent').classList.add('scale-90');
+            setTimeout(() => { document.getElementById('successModal').classList.add('hidden'); }, 300);
+        }
+    </script>
+</body>
+
+</html>
