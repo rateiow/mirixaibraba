@@ -138,34 +138,6 @@
             border-color: white !important;
             box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
         }
-
-        /* Calendar Day Styles */
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .calendar-day:hover:not(.empty) {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .calendar-day.selected {
-            background: white;
-            color: black;
-        }
-
-        .calendar-day.empty {
-            cursor: default;
-            opacity: 0;
-        }
     </style>
 </head>
 
@@ -427,7 +399,6 @@
                                 Diagnóstico</button>
                         </div>
                     </div>
-                    <!-- BOTAO GRUPO DE NETWORKING FORA DO CAMPO PRETO -->
                     <div class="mt-12 text-center">
                         <a href="https://www.youtube.com/" target="_blank"
                             class="inline-block w-full max-w-lg bg-black text-white py-6 rounded-2xl font-extrabold text-xl btn-premium shadow-xl">GRUPO
@@ -518,8 +489,10 @@
             lucide.createIcons();
 
             // --- PROTEÇÃO / SECURITY ---
+            // 1. Bloqueia botão direito
             document.addEventListener('contextmenu', e => e.preventDefault());
 
+            // 2. Bloqueia atalhos de desenvolvedor
             document.onkeydown = (e) => {
                 const forbidden = [123, 73, 74, 67, 85, 83]; // F12, I, J, C, U, S
                 if (forbidden.includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode === 123)) {
@@ -527,11 +500,14 @@
                 }
             };
 
+            // 3. Debugger Trap (Anti-DevTools)
+            // Isso cria um loop que pausa o navegador se o DevTools for aberto
             (function detectDevTools() {
                 const start = performance.now();
                 debugger;
                 const end = performance.now();
                 if (end - start > 100) {
+                    // Se o debugger causar um atraso, o DevTools está provavelmente aberto
                     document.body.innerHTML = `
                         <div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#000; color:#fff; font-family:sans-serif; text-align:center; padding:20px;">
                             <h1 style="font-size:3rem; margin-bottom:1rem;">Acesso Protegido</h1>
@@ -543,6 +519,7 @@
                 setTimeout(detectDevTools, 500);
             })();
 
+            // 4. Bloqueia arrastar elementos (evita salvar imagens/códigos)
             document.addEventListener('dragstart', e => e.preventDefault());
 
             // --- LENIS ---
@@ -579,22 +556,20 @@
             // --- MOBILE MENU ---
             const mobileBtn = document.querySelector('.mobile-menu-toggle');
             const navMenu = document.querySelector('.nav-menu');
-            if (mobileBtn && navMenu) {
-                mobileBtn.onclick = () => {
-                    navMenu.classList.toggle('active');
-                    mobileBtn.querySelectorAll('span').forEach((s, i) => {
-                        if (navMenu.classList.contains('active')) {
-                            if (i == 0) s.style.transform = 'rotate(45deg) translate(5px, 5px)';
-                            if (i == 1) s.style.opacity = '0';
-                            if (i == 2) s.style.transform = 'rotate(-45deg) translate(5px, -5px)';
-                        } else {
-                            s.style.transform = 'none'; s.style.opacity = '1';
-                        }
-                    });
-                };
-            }
+            mobileBtn.onclick = () => {
+                navMenu.classList.toggle('active');
+                mobileBtn.querySelectorAll('span').forEach((s, i) => {
+                    if (navMenu.classList.contains('active')) {
+                        if (i == 0) s.style.transform = 'rotate(45deg) translate(5px, 5px)';
+                        if (i == 1) s.style.opacity = '0';
+                        if (i == 2) s.style.transform = 'rotate(-45deg) translate(5px, -5px)';
+                    } else {
+                        s.style.transform = 'none'; s.style.opacity = '1';
+                    }
+                });
+            };
             document.querySelectorAll('.nav-link').forEach(l => l.onclick = () => {
-                if (navMenu && navMenu.classList.contains('active')) mobileBtn.click();
+                if (navMenu.classList.contains('active')) mobileBtn.click();
             });
 
             // --- FAQ ACCORDION ---
@@ -609,88 +584,123 @@
 
             // --- PHONE MASK ---
             const waInput = document.getElementById('whatsapp');
-            if (waInput) {
-                waInput.oninput = (e) => {
-                    let v = e.target.value.replace(/\D/g, '').substring(0, 11);
-                    if (v.length > 0) v = '(' + v;
-                    if (v.length > 3) v = v.substring(0, 3) + ') ' + v.substring(3);
-                    if (v.length > 10) v = v.substring(0, 10) + '-' + v.substring(10);
-                    e.target.value = v;
-                };
-            }
-
-            // --- CALENDAR LOGIC (FIXED) ---
-            let currentMonth = new Date().getMonth();
-            let currentYear = new Date().getFullYear();
-            const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-
-            window.changeMonth = (dir) => {
-                currentMonth += dir;
-                if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-                if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-                renderCalendar();
+            waInput.oninput = (e) => {
+                let v = e.target.value.replace(/\D/g, '').substring(0, 11);
+                let x = v.match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : x[1] + ' ' + x[2] + (x[3] ? '-' + x[3] : '');
             };
 
+            // --- CALENDAR LOGIC ---
+            let currentDisplayDate = new Date();
+            let selectedDateValue = null;
+            const monthsNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const timeSlots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
+
             function renderCalendar() {
-                const monthEl = document.getElementById('calendarMonth');
-                const daysEl = document.getElementById('calendarDays');
-                if (!monthEl || !daysEl) return;
+                const year = currentDisplayDate.getFullYear();
+                const month = currentDisplayDate.getMonth();
+                document.getElementById('calendarMonth').innerText = `${monthsNames[month]} ${year}`;
+                const firstDay = new Date(year, month, 1).getDay();
+                const lastDate = new Date(year, month + 1, 0).getDate();
+                const daysCont = document.getElementById('calendarDays');
+                daysCont.innerHTML = "";
+                const booked = JSON.parse(localStorage.getItem('mirix_booked_days') || "[]");
 
-                monthEl.innerText = `${months[currentMonth]} ${currentYear}`;
-                daysEl.innerHTML = '';
+                for (let i = 0; i < firstDay; i++) daysCont.appendChild(document.createElement("div"));
+                for (let d = 1; d <= lastDate; d++) {
+                    const dateObj = new Date(year, month, d);
+                    const ds = dateObj.toISOString().split('T')[0];
+                    const btn = document.createElement("button");
+                    btn.type = "button"; btn.innerText = d;
+                    btn.className = "h-10 rounded-xl text-xs font-bold transition-all flex items-center justify-center ";
 
-                const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-                for (let i = 0; i < firstDay; i++) {
-                    const empty = document.createElement('div');
-                    empty.className = 'calendar-day empty';
-                    daysEl.appendChild(empty);
-                }
-
-                for (let i = 1; i <= daysInMonth; i++) {
-                    const day = document.createElement('div');
-                    day.className = 'calendar-day';
-                    day.innerText = i;
-                    day.onclick = () => {
-                        document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
-                        day.classList.add('selected');
-                        document.getElementById('meetingDate').value = `${i}/${currentMonth + 1}/${currentYear}`;
-                    };
-                    daysEl.appendChild(day);
+                    const isPast = dateObj.setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0);
+                    if (isPast || booked.includes(ds)) {
+                        btn.className += "opacity-10 cursor-not-allowed"; btn.disabled = true;
+                    } else {
+                        const isSelected = selectedDateValue && ds === selectedDateValue.toISOString().split('T')[0];
+                        btn.className += "hover:bg-white/10 " + (isSelected ? "bg-white text-black shadow-lg" : "bg-white/5 text-white/60");
+                        btn.onclick = () => {
+                            selectedDateValue = dateObj;
+                            document.getElementById('meetingDate').value = ds;
+                            renderCalendar();
+                        };
+                    }
+                    daysCont.appendChild(btn);
                 }
             }
-            renderCalendar();
 
-            // --- TIME GRID ---
-            const timeGrid = document.getElementById('timeGrid');
-            if (timeGrid) {
-                const times = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
-                times.forEach(t => {
-                    const btn = document.createElement('div');
-                    btn.className = 'p-4 rounded-xl border border-white/10 text-center cursor-pointer hover:bg-white/10 transition text-sm font-bold';
-                    btn.innerText = t;
-                    btn.onclick = () => {
-                        document.querySelectorAll('#timeGrid div').forEach(d => d.classList.remove('active-slot'));
-                        btn.classList.add('active-slot');
-                        document.getElementById('meetingTime').value = t;
-                    };
-                    timeGrid.appendChild(btn);
+            window.changeMonth = (o) => { currentDisplayDate.setMonth(currentDisplayDate.getMonth() + o); renderCalendar(); };
+
+            function renderTimeGrid() {
+                const tg = document.getElementById('timeGrid');
+                tg.innerHTML = "";
+                timeSlots.forEach(s => {
+                    const btn = document.createElement("button");
+                    btn.type = "button"; btn.innerText = s;
+                    const isSel = document.getElementById('meetingTime').value === s;
+                    btn.className = `py-4 rounded-xl text-xs font-bold transition-all border ${isSel ? "active-slot" : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10"}`;
+                    btn.onclick = () => { document.getElementById('meetingTime').value = s; renderTimeGrid(); };
+                    tg.appendChild(btn);
                 });
             }
+
+            renderCalendar(); renderTimeGrid();
+
+            // --- TELEGRAM INTEGRATION ---
+            const formObj = document.querySelector('.contact-form');
+            formObj.onsubmit = async (e) => {
+                e.preventDefault();
+                const dateVal = document.getElementById('meetingDate').value;
+                const timeVal = document.getElementById('meetingTime').value;
+                if (!dateVal || !timeVal) { alert("Por favor, selecione data e horário."); return; }
+
+                const btn = formObj.querySelector('button[type="submit"]');
+                const orig = btn.innerText; btn.innerText = "Sintonizando...";
+
+                const fd = new FormData(formObj);
+                const message = `<b>Novo Formulário de Diagnóstico</b>\n\n` +
+                    `<b>Nome:</b> ${fd.get('nome')}\n` +
+                    `<b>WhatsApp:</b> ${fd.get('whatsapp')}\n` +
+                    `<b>Email:</b> ${fd.get('email')}\n` +
+                    `<b>Empresa:</b> ${fd.get('empresa')}\n` +
+                    `<b>Agendado para:</b> ${dateVal} às ${timeVal}`;
+
+                const token = '8245451978:AAE0pBckFFPba7o3QAaa-BTYG-klIxUe3do';
+                const chatId = '-4985215344';
+
+                try {
+                    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
+                    });
+
+                    if (res.ok) {
+                        let booked = JSON.parse(localStorage.getItem('mirix_booked_days') || "[]");
+                        booked.push(dateVal);
+                        localStorage.setItem('mirix_booked_days', JSON.stringify(booked));
+
+                        document.getElementById('successModal').classList.remove('hidden');
+                        document.getElementById('successModal').classList.add('flex');
+                        formObj.reset(); selectedDateValue = null; renderCalendar(); renderTimeGrid();
+                    }
+                } catch (err) { alert("Falha na conexão."); }
+                btn.innerText = orig;
+            };
         });
 
-        function closeModal() {
-            const modal = document.getElementById('successModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-        }
-
+        // --- AUDIO ---
         function playAgent(name) {
             const status = document.getElementById('audioStatus');
-            if (status) status.innerText = "Tocando áudio de " + name + "...";
+            status.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Reproduzindo: ${name}`;
+            const audio = new Audio(`./audios/${name.toLowerCase()}.mp3`);
+            audio.play().catch(() => status.innerHTML = `<span class="text-red-400">Erro: Arquivo ./audios/${name.toLowerCase()}.mp3 não encontrado.</span>`);
+        }
+
+        function closeModal() {
+            document.getElementById('modalContent').classList.add('scale-90');
+            setTimeout(() => { document.getElementById('successModal').classList.add('hidden'); }, 300);
         }
     </script>
 </body>
